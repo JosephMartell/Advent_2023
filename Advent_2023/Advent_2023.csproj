@@ -8,7 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="JM.CLImber" Version="0.6.0" />
+    <PackageReference Include="JM.CLImber" Version="1.0.0" />
   </ItemGroup>
 
   <ItemGroup>

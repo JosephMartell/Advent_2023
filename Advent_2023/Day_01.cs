@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml;
 using CLImber;
 
 namespace Advent_2023
@@ -39,8 +40,7 @@ namespace Advent_2023
                 string line = string.Empty;
                 while ((line = fileReader.ReadLine()) != null)
                 {
-                    if (ParseText) line = ParseTextToNumbers(line);
-                    total += GetNumberFromLine(line);
+                    total += ParseLine(line);
                 }
             }
 
@@ -50,49 +50,60 @@ namespace Advent_2023
         [CommandHandler]
         public void Run(string line)
         {
-            int total = 0;
-            if (ParseText) line = ParseTextToNumbers(line);
-            total += GetNumberFromLine(line);
-
-            Console.WriteLine($"Total: {total}");
+            Console.WriteLine($"Total: {ParseLine(line)}");
         }
 
-        private string ParseTextToNumbers(string line)
+        private int ParseLine(string line)
         {
-            _numberNames.ToList().ForEach(n => line = line.Replace(n.name, n.number, StringComparison.CurrentCultureIgnoreCase));
-            return line;
+            string forwardLine = ParseText ? ParseFirstNumber(line) : line;
+            string revLine = ParseText ? ParseLastNumber(line) : line;
+            return FirstNumber(forwardLine) * 10 + LastNumber(revLine);
         }
 
-        private int GetNumberFromLine(string line)
-        {
-            return (FindFirstNumber(line) * 10) + FindLastNumber(line);
-        }
 
-        private int FindFirstNumber(string line)
+        private string ParseFirstNumber(string line)
         {
-
-            int digit = 0;
+            string newLine = line;
             for (int i = 0; i < line.Length; i++)
             {
-                if (int.TryParse(line[i].ToString(), out digit))
+                for (int j = 0; j < _numberNames.Length; j++)
                 {
-                    return digit;
+                    if (line.Substring(i).StartsWith(_numberNames[j].name))
+                    {
+                        return line.Replace(_numberNames[j].name, _numberNames[j].number);
+                    }
                 }
             }
-            return 0;
+            return newLine;
+        }
+        private string ParseLastNumber(string line)
+        {
+            string newLine = line;
+            for (int i = line.Length; i > 0; i--)
+            {
+                for (int j = 0; j < _numberNames.Length; j++)
+                {
+                    if (line.Substring(0, line.Length - (line.Length - i)).EndsWith(_numberNames[j].name))
+                    {
+                        return line.Replace(_numberNames[j].name, _numberNames[j].number);
+                    }
+                }
+            }
+            return newLine;
         }
 
-        private int FindLastNumber(string line)
+        private int FirstNumber(string line)
         {
-            int digit = 0;
-            for (int i = line.Length - 1; i >= 0; i--)
-            {
-                if (int.TryParse(line[i].ToString(), out digit))
-                {
-                    return digit;
-                }
-            }
-            return 0;
+            return (from c in line.ToArray() 
+                    where char.IsNumber(c) 
+                    select int.Parse(c.ToString())).First();
+        }
+
+        private int LastNumber(string line)
+        {
+            return (from c in line.ToArray()
+                    where char.IsNumber(c)
+                    select int.Parse(c.ToString())).Last();
         }
 
         
